@@ -146,23 +146,91 @@
                     <h2 class="mt-3 text-3xl font-bold text-slate-950 sm:text-4xl">Sampaikan aspirasi dan laporan warga.</h2>
                     <p class="mt-5 leading-7 text-slate-600">Gunakan kanal pengaduan untuk melaporkan layanan publik, fasilitas umum, kebersihan, keamanan, atau usulan pembangunan desa.</p>
                 </div>
-                <form class="rounded-lg border border-emerald-100 bg-white p-6 shadow-sm" data-reveal="right">
+                <form method="POST" action="{{ route('pengaduan.store') }}" enctype="multipart/form-data" class="rounded-lg border border-emerald-100 bg-white p-6 shadow-sm" data-reveal="right">
+                    @csrf
+                    @if ($errors->any())
+                        <div class="mb-4 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                            {{ $errors->first() }}
+                        </div>
+                    @endif
                     <div class="grid gap-4 md:grid-cols-2">
                         <label class="block">
                             <span class="text-sm font-semibold text-slate-700">Nama</span>
-                            <input class="mt-2 w-full rounded border border-emerald-200 px-4 py-3 outline-none focus:border-emerald-500" type="text" placeholder="Nama lengkap">
+                            <input name="nama" value="{{ old('nama') }}" class="mt-2 w-full rounded border border-emerald-200 px-4 py-3 outline-none focus:border-emerald-500" type="text" placeholder="Nama lengkap" required>
                         </label>
                         <label class="block">
                             <span class="text-sm font-semibold text-slate-700">Kontak</span>
-                            <input class="mt-2 w-full rounded border border-emerald-200 px-4 py-3 outline-none focus:border-emerald-500" type="text" placeholder="Nomor HP atau email">
+                            <input name="kontak" value="{{ old('kontak') }}" class="mt-2 w-full rounded border border-emerald-200 px-4 py-3 outline-none focus:border-emerald-500" type="text" placeholder="Nomor HP atau email" required>
                         </label>
                     </div>
                     <label class="mt-4 block">
-                        <span class="text-sm font-semibold text-slate-700">Isi Pengaduan</span>
-                        <textarea class="mt-2 min-h-32 w-full rounded border border-emerald-200 px-4 py-3 outline-none focus:border-emerald-500" placeholder="Tuliskan laporan atau aspirasi"></textarea>
+                        <span class="text-sm font-semibold text-slate-700">Lokasi</span>
+                        <input name="lokasi" value="{{ old('lokasi') }}" class="mt-2 w-full rounded border border-emerald-200 px-4 py-3 outline-none focus:border-emerald-500" type="text" placeholder="Contoh: Banjar Kiadan, dekat balai banjar" required>
                     </label>
-                    <button type="button" class="mt-5 rounded bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800">Kirim Pengaduan</button>
+                    <div class="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 p-4">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm font-bold text-slate-800">Geotag lokasi</p>
+                                <p id="complaint-location-status" class="mt-1 text-sm text-slate-600">Koordinat belum diambil.</p>
+                            </div>
+                            <button type="button" id="complaint-location-button" class="rounded border border-emerald-200 bg-white px-4 py-2 text-sm font-bold text-emerald-800 transition hover:bg-emerald-100">Ambil Lokasi Saya</button>
+                        </div>
+                        <input type="hidden" name="latitude" id="complaint-latitude" value="{{ old('latitude') }}">
+                        <input type="hidden" name="longitude" id="complaint-longitude" value="{{ old('longitude') }}">
+                    </div>
+                    <label class="mt-4 block">
+                        <span class="text-sm font-semibold text-slate-700">Isi Pengaduan</span>
+                        <textarea name="isi" class="mt-2 min-h-32 w-full rounded border border-emerald-200 px-4 py-3 outline-none focus:border-emerald-500" placeholder="Tuliskan laporan atau aspirasi" required>{{ old('isi') }}</textarea>
+                    </label>
+                    <div class="mt-4 grid gap-4 md:grid-cols-2">
+                        <label class="block">
+                            <span class="text-sm font-semibold text-slate-700">Tag</span>
+                            <input name="tags" value="{{ old('tags') }}" class="mt-2 w-full rounded border border-emerald-200 px-4 py-3 outline-none focus:border-emerald-500" type="text" placeholder="jalan, sampah, lampu">
+                        </label>
+                        <label class="block">
+                            <span class="text-sm font-semibold text-slate-700">Foto</span>
+                            <input name="foto" class="mt-2 w-full rounded border border-dashed border-emerald-200 bg-emerald-50 px-4 py-3 text-sm file:mr-3 file:rounded file:border-0 file:bg-emerald-700 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white" type="file" accept="image/*">
+                        </label>
+                    </div>
+                    <div class="mt-5 flex flex-wrap items-center gap-3">
+                        <button class="rounded bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800">Kirim Pengaduan</button>
+                        <a href="{{ route('pengaduan.index') }}" class="rounded border border-emerald-200 px-5 py-3 font-semibold text-emerald-800 transition hover:bg-emerald-50">Lihat Daftar Aduan</a>
+                    </div>
                 </form>
+            </div>
+
+            <div class="mx-auto mt-10 max-w-7xl px-4 sm:px-6 lg:px-8" data-reveal>
+                <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-950">Aduan Terbaru</h3>
+                        <p class="mt-2 text-sm leading-6 text-slate-600">Beberapa pengaduan terakhir dan status penanganannya.</p>
+                    </div>
+                    @if ($totalPengaduan > 3)
+                        <a href="{{ route('pengaduan.index') }}" class="text-sm font-bold text-emerald-700 hover:text-emerald-900">View More</a>
+                    @endif
+                </div>
+                <div class="mt-5 grid gap-4 md:grid-cols-3">
+                    @forelse ($pengaduans as $pengaduan)
+                        <a href="{{ route('pengaduan.show', $pengaduan) }}" class="rounded-lg border border-emerald-100 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+                            <div class="flex items-start justify-between gap-3">
+                                <p class="font-bold text-slate-950">{{ $pengaduan->nomor }}</p>
+                                <span class="shrink-0 rounded px-3 py-1 text-xs font-bold {{ $pengaduan->status === 'selesai' ? 'bg-emerald-50 text-emerald-700' : ($pengaduan->status === 'diproses' ? 'bg-sky-50 text-sky-700' : 'bg-amber-50 text-amber-700') }}">
+                                    {{ $pengaduan->status_label }}
+                                </span>
+                            </div>
+                            <p class="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{{ $pengaduan->isi }}</p>
+                            <div class="mt-4 flex flex-wrap gap-2">
+                                @foreach ($pengaduan->tags ?? [] as $tag)
+                                    <span class="rounded bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700">#{{ $tag }}</span>
+                                @endforeach
+                            </div>
+                        </a>
+                    @empty
+                        <div class="rounded-lg border border-emerald-100 bg-white p-6 text-slate-600 md:col-span-3">
+                            Belum ada pengaduan yang tercatat.
+                        </div>
+                    @endforelse
+                </div>
             </div>
         </section>
 
@@ -478,6 +546,41 @@
             if (event.target === publicAgendaModal) {
                 closePublicAgendaModal();
             }
+        });
+
+        const complaintLocationButton = document.querySelector('#complaint-location-button');
+        const complaintLocationStatus = document.querySelector('#complaint-location-status');
+        const complaintLatitude = document.querySelector('#complaint-latitude');
+        const complaintLongitude = document.querySelector('#complaint-longitude');
+
+        complaintLocationButton?.addEventListener('click', () => {
+            if (!navigator.geolocation) {
+                complaintLocationStatus.textContent = 'Browser tidak mendukung geolocation.';
+                return;
+            }
+
+            complaintLocationButton.disabled = true;
+            complaintLocationButton.textContent = 'Mengambil lokasi...';
+            complaintLocationStatus.textContent = 'Mohon izinkan akses lokasi pada browser.';
+
+            navigator.geolocation.getCurrentPosition((position) => {
+                const latitude = position.coords.latitude.toFixed(7);
+                const longitude = position.coords.longitude.toFixed(7);
+
+                complaintLatitude.value = latitude;
+                complaintLongitude.value = longitude;
+                complaintLocationStatus.textContent = `Lokasi tersimpan: ${latitude}, ${longitude}`;
+                complaintLocationButton.disabled = false;
+                complaintLocationButton.textContent = 'Perbarui Lokasi';
+            }, () => {
+                complaintLocationStatus.textContent = 'Lokasi gagal diambil. Pastikan izin lokasi aktif.';
+                complaintLocationButton.disabled = false;
+                complaintLocationButton.textContent = 'Ambil Lokasi Saya';
+            }, {
+                enableHighAccuracy: true,
+                timeout: 12000,
+                maximumAge: 0,
+            });
         });
     </script>
 </body>

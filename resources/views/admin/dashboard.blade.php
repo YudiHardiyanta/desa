@@ -54,6 +54,7 @@
                     <a href="{{ route('admin.berita.create') }}" class="rounded border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800">Tambah Berita</a>
                     <a href="{{ route('admin.agenda.index') }}" class="rounded border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800">Tambah Agenda</a>
                     <a href="{{ route('admin.galeri.index') }}" class="rounded border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800">Kelola Galeri</a>
+                    <a href="{{ route('admin.pengaduan.index') }}" class="rounded border border-slate-200 px-4 py-3 text-sm font-semibold text-slate-700 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-800">Kelola Pengaduan</a>
                 </div>
             </section>
         </div>

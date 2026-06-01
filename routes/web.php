@@ -4,10 +4,12 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BeritaController;
 use App\Http\Controllers\GalleryController;
+use App\Http\Controllers\PengaduanController;
 use App\Models\Agenda;
 use App\Models\Berita;
 use App\Models\GalleryCollection;
 use App\Models\GalleryPhoto;
+use App\Models\Pengaduan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -46,8 +48,10 @@ Route::get('/', function () {
         ->get();
     $totalGaleri = GalleryCollection::where('is_active', true)->count()
         + GalleryPhoto::where('is_active', true)->whereNull('gallery_collection_id')->count();
+    $pengaduans = Pengaduan::latest()->take(3)->get();
+    $totalPengaduan = Pengaduan::count();
 
-    return view('welcome', compact('beritas', 'totalBerita', 'agendas', 'agendaCalendar', 'agendaMonthDays', 'galleryCollections', 'galleryPhotos', 'totalGaleri'));
+    return view('welcome', compact('beritas', 'totalBerita', 'agendas', 'agendaCalendar', 'agendaMonthDays', 'galleryCollections', 'galleryPhotos', 'totalGaleri', 'pengaduans', 'totalPengaduan'));
 });
 
 Route::get('/berita', function () {
@@ -89,6 +93,13 @@ Route::get('/galeri/{collection}', function (GalleryCollection $collection) {
 
     return view('galeri.show', compact('collection', 'photos'));
 })->name('galeri.show');
+
+Route::get('/pengaduan', [PengaduanController::class, 'publicIndex'])
+    ->name('pengaduan.index');
+Route::post('/pengaduan', [PengaduanController::class, 'store'])
+    ->name('pengaduan.store');
+Route::get('/pengaduan/{pengaduan}', [PengaduanController::class, 'publicShow'])
+    ->name('pengaduan.show');
 
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
@@ -148,4 +159,11 @@ Route::middleware('auth')->group(function () {
         ->name('admin.galeri.photos.toggle');
     Route::delete('/admin/galeri/photos/{photo}', [GalleryController::class, 'destroyPhoto'])
         ->name('admin.galeri.photos.destroy');
+
+    Route::get('/admin/pengaduan', [PengaduanController::class, 'adminIndex'])
+        ->name('admin.pengaduan.index');
+    Route::put('/admin/pengaduan/{pengaduan}', [PengaduanController::class, 'update'])
+        ->name('admin.pengaduan.update');
+    Route::delete('/admin/pengaduan/{pengaduan}', [PengaduanController::class, 'destroy'])
+        ->name('admin.pengaduan.destroy');
 });

@@ -4,7 +4,7 @@
         ['label' => 'Berita Desa', 'href' => route('admin.berita.index'), 'active' => request()->routeIs('admin.berita.*'), 'icon' => 'newspaper'],
         ['label' => 'Agenda', 'href' => route('admin.agenda.index'), 'active' => request()->routeIs('admin.agenda.*'), 'icon' => 'calendar'],
         ['label' => 'Galeri', 'href' => route('admin.galeri.index'), 'active' => request()->routeIs('admin.galeri.*'), 'icon' => 'image'],
-        ['label' => 'Pengaduan', 'href' => '#', 'active' => false, 'icon' => 'message'],
+        ['label' => 'Pengaduan', 'href' => route('admin.pengaduan.index'), 'active' => request()->routeIs('admin.pengaduan.*'), 'icon' => 'message'],
         ['label' => 'Pengaturan', 'href' => '#', 'active' => false, 'icon' => 'settings'],
     ];
 
