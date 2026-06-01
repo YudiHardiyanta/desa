@@ -3,8 +3,11 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BeritaController;
+use App\Http\Controllers\GalleryController;
 use App\Models\Agenda;
 use App\Models\Berita;
+use App\Models\GalleryCollection;
+use App\Models\GalleryPhoto;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,8 +33,21 @@ Route::get('/', function () {
     for ($day = $agendaStartDay; $day->lte($agendaEndDay); $day->addDay()) {
         $agendaMonthDays->push($day->copy());
     }
+    $galleryCollections = GalleryCollection::where('is_active', true)
+        ->with(['activePhotos' => fn ($query) => $query->latest()->take(4)])
+        ->withCount(['activePhotos as active_photos_count'])
+        ->latest()
+        ->take(3)
+        ->get();
+    $galleryPhotos = GalleryPhoto::where('is_active', true)
+        ->whereNull('gallery_collection_id')
+        ->latest()
+        ->take(4)
+        ->get();
+    $totalGaleri = GalleryCollection::where('is_active', true)->count()
+        + GalleryPhoto::where('is_active', true)->whereNull('gallery_collection_id')->count();
 
-    return view('welcome', compact('beritas', 'totalBerita', 'agendas', 'agendaCalendar', 'agendaMonthDays'));
+    return view('welcome', compact('beritas', 'totalBerita', 'agendas', 'agendaCalendar', 'agendaMonthDays', 'galleryCollections', 'galleryPhotos', 'totalGaleri'));
 });
 
 Route::get('/berita', function () {
@@ -51,6 +67,28 @@ Route::get('/berita/{berita}', function (Berita $berita) {
 
     return view('berita.show', compact('berita', 'beritaLainnya'));
 })->name('berita.show');
+
+Route::get('/galeri', function () {
+    $collections = GalleryCollection::where('is_active', true)
+        ->with(['activePhotos' => fn ($query) => $query->latest()->take(6)])
+        ->withCount(['activePhotos as active_photos_count'])
+        ->latest()
+        ->paginate(6);
+    $standalonePhotos = GalleryPhoto::where('is_active', true)
+        ->whereNull('gallery_collection_id')
+        ->latest()
+        ->paginate(12, ['*'], 'foto');
+
+    return view('galeri.index', compact('collections', 'standalonePhotos'));
+})->name('galeri.index');
+
+Route::get('/galeri/{collection}', function (GalleryCollection $collection) {
+    abort_unless($collection->is_active, 404);
+
+    $photos = $collection->activePhotos()->latest()->paginate(12);
+
+    return view('galeri.show', compact('collection', 'photos'));
+})->name('galeri.show');
 
 Route::get('/login', [AuthController::class, 'showLogin'])
     ->name('login');
@@ -91,4 +129,23 @@ Route::middleware('auth')->group(function () {
         ->name('admin.agenda.toggle');
     Route::delete('/admin/agenda/{agenda}', [AgendaController::class, 'destroy'])
         ->name('admin.agenda.destroy');
+
+    Route::get('/admin/galeri', [GalleryController::class, 'index'])
+        ->name('admin.galeri.index');
+    Route::get('/admin/galeri/collections/{collection}', [GalleryController::class, 'showCollection'])
+        ->name('admin.galeri.collections.show');
+    Route::post('/admin/galeri/collections', [GalleryController::class, 'storeCollection'])
+        ->name('admin.galeri.collections.store');
+    Route::put('/admin/galeri/collections/{collection}', [GalleryController::class, 'updateCollection'])
+        ->name('admin.galeri.collections.update');
+    Route::delete('/admin/galeri/collections/{collection}', [GalleryController::class, 'destroyCollection'])
+        ->name('admin.galeri.collections.destroy');
+    Route::post('/admin/galeri/photos', [GalleryController::class, 'storePhotos'])
+        ->name('admin.galeri.photos.store');
+    Route::put('/admin/galeri/photos/{photo}', [GalleryController::class, 'updatePhoto'])
+        ->name('admin.galeri.photos.update');
+    Route::patch('/admin/galeri/photos/{photo}/toggle', [GalleryController::class, 'togglePhoto'])
+        ->name('admin.galeri.photos.toggle');
+    Route::delete('/admin/galeri/photos/{photo}', [GalleryController::class, 'destroyPhoto'])
+        ->name('admin.galeri.photos.destroy');
 });

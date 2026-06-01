@@ -310,20 +310,51 @@
 
         <section id="galeri" class="bg-white py-20">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="max-w-2xl" data-reveal>
-                    <p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Galeri</p>
-                    <h2 class="mt-3 text-3xl font-bold text-slate-950 sm:text-4xl">Potret Desa Pelaga.</h2>
+                <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end" data-reveal>
+                    <div>
+                        <p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Galeri</p>
+                        <h2 class="mt-3 text-3xl font-bold text-slate-950 sm:text-4xl">Potret Desa Pelaga.</h2>
+                    </div>
+                    <p class="max-w-xl leading-7 text-slate-600">Dokumentasi kegiatan desa dapat ditampilkan sebagai collection atau foto tunggal tanpa collection.</p>
                 </div>
-                <div class="mt-10 grid grid-cols-2 gap-3 md:grid-cols-4" data-reveal>
-                    @foreach ([
-                        'https://images.unsplash.com/photo-1473773508845-188df298d2d1?auto=format&fit=crop&w=520&q=70',
-                        'https://images.unsplash.com/photo-1495107334309-fcf20504a5ab?auto=format&fit=crop&w=520&q=70',
-                        'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=520&q=70',
-                        'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=520&q=70',
-                    ] as $image)
-                        <img src="{{ $image }}" alt="Galeri Desa Pelaga" class="aspect-[4/3] w-full rounded-lg object-cover transition duration-300 hover:scale-[1.02]" width="520" height="390" loading="lazy" decoding="async">
-                    @endforeach
+
+                <div class="mt-10 grid gap-5 md:grid-cols-3" data-reveal>
+                    @forelse ($galleryCollections as $collection)
+                        @php $coverPhoto = $collection->activePhotos->first(); @endphp
+                        <a href="{{ route('galeri.show', $collection) }}" class="block overflow-hidden rounded-lg border border-emerald-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                            @if ($coverPhoto)
+                                <img src="{{ asset('storage/'.$coverPhoto->path) }}" alt="{{ $collection->judul }}" class="h-52 w-full object-cover" loading="lazy" decoding="async">
+                            @else
+                                <div class="grid h-52 place-items-center bg-emerald-50 text-sm font-bold text-emerald-700">Belum ada foto</div>
+                            @endif
+                            <div class="p-5">
+                                <p class="text-sm font-bold text-emerald-700">{{ $collection->active_photos_count }} foto</p>
+                                <h3 class="mt-2 text-lg font-bold text-slate-950">{{ $collection->judul }}</h3>
+                                <p class="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{{ $collection->deskripsi ?: 'Collection dokumentasi Desa Pelaga.' }}</p>
+                            </div>
+                        </a>
+                    @empty
+                        @forelse ($galleryPhotos as $photo)
+                            <a href="{{ asset('storage/'.$photo->path) }}" class="block overflow-hidden rounded-lg border border-emerald-100 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg" target="_blank">
+                                <img src="{{ asset('storage/'.$photo->path) }}" alt="{{ $photo->judul ?: 'Galeri Desa Pelaga' }}" class="h-52 w-full object-cover" loading="lazy" decoding="async">
+                                <div class="p-5">
+                                    <h3 class="text-lg font-bold text-slate-950">{{ $photo->judul ?: 'Foto Desa Pelaga' }}</h3>
+                                    <p class="mt-3 line-clamp-2 text-sm leading-6 text-slate-600">{{ $photo->deskripsi ?: 'Dokumentasi Desa Pelaga.' }}</p>
+                                </div>
+                            </a>
+                        @empty
+                            <div class="rounded-lg border border-emerald-100 bg-white p-6 text-slate-600 md:col-span-3">
+                                Belum ada galeri desa yang diterbitkan.
+                            </div>
+                        @endforelse
+                    @endforelse
                 </div>
+
+                @if ($totalGaleri > 3)
+                    <div class="mt-10 text-center">
+                        <a href="{{ route('galeri.index') }}" class="inline-flex rounded bg-emerald-700 px-5 py-3 font-semibold text-white transition hover:bg-emerald-800">View More</a>
+                    </div>
+                @endif
             </div>
         </section>
 
