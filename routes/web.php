@@ -1,15 +1,37 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BeritaController;
+use App\Models\Agenda;
 use App\Models\Berita;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     $beritas = Berita::where('is_active', true)->latest('tanggal_berita')->latest()->take(3)->get();
     $totalBerita = Berita::where('is_active', true)->count();
+    $agendas = Agenda::where('is_active', true)
+        ->whereDate('tanggal_event', '>=', now()->toDateString())
+        ->orderBy('tanggal_event')
+        ->orderBy('waktu_mulai')
+        ->take(3)
+        ->get();
+    $agendaCalendar = Agenda::where('is_active', true)
+        ->whereBetween('tanggal_event', [now()->copy()->startOfMonth()->toDateString(), now()->copy()->endOfMonth()->toDateString()])
+        ->orderBy('tanggal_event')
+        ->orderBy('waktu_mulai')
+        ->get()
+        ->groupBy(fn (Agenda $agenda): string => $agenda->tanggal_event->toDateString());
+    $agendaMonthDays = collect();
 
-    return view('welcome', compact('beritas', 'totalBerita'));
+    $agendaStartDay = now()->copy()->startOfMonth()->startOfWeek();
+    $agendaEndDay = now()->copy()->endOfMonth()->endOfWeek();
+
+    for ($day = $agendaStartDay; $day->lte($agendaEndDay); $day->addDay()) {
+        $agendaMonthDays->push($day->copy());
+    }
+
+    return view('welcome', compact('beritas', 'totalBerita', 'agendas', 'agendaCalendar', 'agendaMonthDays'));
 });
 
 Route::get('/berita', function () {
@@ -58,4 +80,15 @@ Route::middleware('auth')->group(function () {
         ->name('admin.berita.toggle');
     Route::delete('/admin/berita/{berita}', [BeritaController::class, 'destroy'])
         ->name('admin.berita.destroy');
+
+    Route::get('/admin/agenda', [AgendaController::class, 'index'])
+        ->name('admin.agenda.index');
+    Route::post('/admin/agenda', [AgendaController::class, 'store'])
+        ->name('admin.agenda.store');
+    Route::put('/admin/agenda/{agenda}', [AgendaController::class, 'update'])
+        ->name('admin.agenda.update');
+    Route::patch('/admin/agenda/{agenda}/toggle', [AgendaController::class, 'toggle'])
+        ->name('admin.agenda.toggle');
+    Route::delete('/admin/agenda/{agenda}', [AgendaController::class, 'destroy'])
+        ->name('admin.agenda.destroy');
 });

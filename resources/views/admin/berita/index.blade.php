@@ -107,7 +107,7 @@
                                                 <span class="pointer-events-none absolute -top-10 right-0 z-10 whitespace-nowrap rounded bg-slate-950 px-2.5 py-1.5 text-xs font-semibold text-white opacity-0 shadow transition group-hover:opacity-100 group-focus:opacity-100">{{ $berita->is_active ? 'Sembunyikan berita' : 'Tampilkan berita' }}</span>
                                             </button>
                                         </form>
-                                        <form method="POST" action="{{ route('admin.berita.destroy', $berita) }}" data-delete-form>
+                                        <form method="POST" action="{{ route('admin.berita.destroy', $berita) }}" data-delete-form data-delete-title="Hapus berita?" data-delete-message="Data berita yang dihapus tidak akan tampil lagi dan tidak bisa dikembalikan dari halaman ini.">
                                             @csrf
                                             @method('DELETE')
                                             <button

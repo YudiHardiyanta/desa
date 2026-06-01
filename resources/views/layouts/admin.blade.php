@@ -51,8 +51,8 @@
                     <path d="M14 11v5" />
                 </svg>
             </span>
-            <h2 id="delete-modal-title" class="mt-4 text-lg font-bold text-slate-950">Hapus berita?</h2>
-            <p class="mt-2 leading-6 text-slate-600">Data berita yang dihapus tidak akan tampil lagi dan tidak bisa dikembalikan dari halaman ini.</p>
+            <h2 id="delete-modal-title" class="mt-4 text-lg font-bold text-slate-950">Hapus data?</h2>
+            <p id="delete-modal-message" class="mt-2 leading-6 text-slate-600">Data yang dihapus tidak bisa dikembalikan dari halaman ini.</p>
             <div class="mt-6 grid grid-cols-2 gap-3">
                 <button
                     type="button"
@@ -133,6 +133,8 @@
 
         let pendingDeleteForm = null;
         const deleteModal = document.querySelector('#delete-modal');
+        const deleteModalTitle = document.querySelector('#delete-modal-title');
+        const deleteModalMessage = document.querySelector('#delete-modal-message');
         const confirmDeleteButton = document.querySelector('#confirm-delete-button');
 
         document.addEventListener('submit', (event) => {
@@ -144,6 +146,12 @@
 
             event.preventDefault();
             pendingDeleteForm = form;
+            if (deleteModalTitle) {
+                deleteModalTitle.textContent = form.dataset.deleteTitle || 'Hapus data?';
+            }
+            if (deleteModalMessage) {
+                deleteModalMessage.textContent = form.dataset.deleteMessage || 'Data yang dihapus tidak bisa dikembalikan dari halaman ini.';
+            }
             openModal(deleteModal);
         });
 

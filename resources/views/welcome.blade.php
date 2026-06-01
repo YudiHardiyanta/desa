@@ -175,18 +175,97 @@
                     </div>
                     <p class="max-w-xl leading-7 text-slate-600">Agenda desa membantu warga mengikuti musyawarah, pelayanan keliling, kegiatan adat, dan kerja bakti lingkungan.</p>
                 </div>
-                <div class="mt-10 grid gap-4 md:grid-cols-3" data-reveal>
-                    @foreach ([
-                        ['03 Jun', 'Musyawarah Perencanaan Desa', 'Balai Desa Pelaga'],
-                        ['08 Jun', 'Pelayanan Administrasi Terpadu', 'Kantor Perbekel'],
-                        ['15 Jun', 'Kerja Bakti Kebersihan Lingkungan', 'Wilayah Banjar'],
-                    ] as [$date, $title, $place])
-                        <article class="rounded-lg border border-emerald-100 p-6 transition duration-300 hover:-translate-y-1 hover:shadow-lg">
-                            <p class="text-sm font-bold text-emerald-700">{{ $date }}</p>
-                            <h3 class="mt-3 text-xl font-bold text-slate-950">{{ $title }}</h3>
-                            <p class="mt-3 text-slate-600">{{ $place }}</p>
-                        </article>
-                    @endforeach
+                <div class="mt-10 grid gap-6 lg:grid-cols-[1.15fr_0.85fr]" data-reveal>
+                    <section class="rounded-lg border border-emerald-100 bg-emerald-50/50 p-4">
+                        <div class="mb-4 flex items-center justify-between">
+                            <h3 class="font-bold text-slate-950">{{ now()->translatedFormat('F Y') }}</h3>
+                            <span class="rounded bg-white px-3 py-1 text-xs font-bold text-emerald-700">Kalender Kegiatan</span>
+                        </div>
+                        <div class="grid grid-cols-7 rounded-t bg-emerald-800 text-center text-xs font-bold text-white">
+                            @foreach (['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'] as $dayName)
+                                <div class="px-2 py-2">{{ $dayName }}</div>
+                            @endforeach
+                        </div>
+                        <div class="grid grid-cols-7 overflow-hidden rounded-b border border-emerald-100 bg-white">
+                            @foreach ($agendaMonthDays as $day)
+                                @php
+                                    $dateKey = $day->toDateString();
+                                    $dayAgendas = $agendaCalendar->get($dateKey, collect());
+                                    $agendaPayload = $dayAgendas->map(fn ($agenda) => [
+                                        'judul' => $agenda->judul,
+                                        'tanggal' => $agenda->tanggal_event->translatedFormat('d M Y'),
+                                        'waktu_mulai' => $agenda->waktu_mulai ? substr($agenda->waktu_mulai, 0, 5) : '',
+                                        'waktu_selesai' => $agenda->waktu_selesai ? substr($agenda->waktu_selesai, 0, 5) : '',
+                                        'lokasi' => $agenda->lokasi,
+                                        'deskripsi' => $agenda->deskripsi,
+                                    ])->values();
+                                @endphp
+                                <button
+                                    type="button"
+                                    class="min-h-24 border-b border-r border-emerald-100 p-2 text-left transition hover:bg-emerald-50 {{ $day->month !== now()->month ? 'bg-slate-50 text-slate-400' : 'bg-white' }}"
+                                    data-public-agenda
+                                    data-date="{{ $day->translatedFormat('d M Y') }}"
+                                    data-agendas='@json($agendaPayload)'
+                                >
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-xs font-bold {{ $day->isToday() ? 'grid size-6 place-items-center rounded-full bg-emerald-700 text-white' : '' }}">{{ $day->day }}</span>
+                                        @if ($dayAgendas->isNotEmpty())
+                                            <span class="size-2 rounded-full bg-lime-500"></span>
+                                        @endif
+                                    </div>
+                                    <div class="mt-2 space-y-1">
+                                        @foreach ($dayAgendas->take(2) as $agenda)
+                                            <div class="truncate rounded bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-900">
+                                                {{ $agenda->waktu_mulai ? substr($agenda->waktu_mulai, 0, 5).' ' : '' }}{{ $agenda->judul }}
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </button>
+                            @endforeach
+                        </div>
+                    </section>
+
+                    <section class="space-y-4">
+                        <h3 class="font-bold text-slate-950">Agenda Mendatang</h3>
+                        @forelse ($agendas as $agenda)
+                            @php
+                                $singleAgendaPayload = [[
+                                    'judul' => $agenda->judul,
+                                    'tanggal' => $agenda->tanggal_event->translatedFormat('d M Y'),
+                                    'waktu_mulai' => $agenda->waktu_mulai ? substr($agenda->waktu_mulai, 0, 5) : '',
+                                    'waktu_selesai' => $agenda->waktu_selesai ? substr($agenda->waktu_selesai, 0, 5) : '',
+                                    'lokasi' => $agenda->lokasi,
+                                    'deskripsi' => $agenda->deskripsi,
+                                ]];
+                            @endphp
+                            <button
+                                type="button"
+                                class="block w-full rounded-lg border border-emerald-100 p-5 text-left transition duration-300 hover:-translate-y-1 hover:bg-emerald-50 hover:shadow-lg"
+                                data-public-agenda
+                                data-date="{{ $agenda->tanggal_event->translatedFormat('d M Y') }}"
+                                data-agendas='@json($singleAgendaPayload)'
+                            >
+                                <p class="text-sm font-bold text-emerald-700">{{ $agenda->tanggal_event->translatedFormat('d M Y') }}</p>
+                                <h4 class="mt-2 text-lg font-bold text-slate-950">{{ $agenda->judul }}</h4>
+                                <p class="mt-2 text-sm font-semibold text-slate-600">
+                                    {{ $agenda->waktu_mulai ? substr($agenda->waktu_mulai, 0, 5) : 'Sehari' }}
+                                    @if ($agenda->waktu_selesai)
+                                        - {{ substr($agenda->waktu_selesai, 0, 5) }}
+                                    @endif
+                                </p>
+                                @if ($agenda->lokasi)
+                                    <p class="mt-2 text-sm text-slate-600">{{ $agenda->lokasi }}</p>
+                                @endif
+                                @if ($agenda->deskripsi)
+                                    <p class="mt-3 line-clamp-2 text-sm leading-6 text-slate-500">{{ $agenda->deskripsi }}</p>
+                                @endif
+                            </button>
+                        @empty
+                            <div class="rounded-lg border border-emerald-100 p-6 text-slate-600">
+                                Belum ada agenda desa mendatang.
+                            </div>
+                        @endforelse
+                    </section>
                 </div>
             </div>
         </section>
@@ -275,6 +354,24 @@
         <p>&copy; {{ date('Y') }} Pemerintah Desa Pelaga. Semua hak dilindungi.</p>
     </footer>
 
+    <div id="public-agenda-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-emerald-950/60 px-4 backdrop-blur-sm">
+        <div class="w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-2xl">
+            <div class="flex items-start justify-between gap-4 border-b border-emerald-100 px-5 py-4">
+                <div>
+                    <p class="text-sm font-bold uppercase tracking-wider text-emerald-700">Detail Agenda</p>
+                    <h3 id="public-agenda-date" class="mt-1 text-xl font-bold text-slate-950">Agenda Desa</h3>
+                </div>
+                <button type="button" class="grid size-10 shrink-0 place-items-center rounded border border-slate-200 text-slate-600 transition hover:bg-slate-50" data-public-agenda-close aria-label="Tutup detail agenda">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6 6 18" />
+                        <path d="m6 6 12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div id="public-agenda-list" class="max-h-[70vh] space-y-3 overflow-y-auto p-5"></div>
+        </div>
+    </div>
+
     <script>
         const revealItems = document.querySelectorAll('[data-reveal]');
 
@@ -292,6 +389,65 @@
         } else {
             revealItems.forEach((item) => item.classList.add('is-visible'));
         }
+
+        const publicAgendaModal = document.querySelector('#public-agenda-modal');
+        const publicAgendaDate = document.querySelector('#public-agenda-date');
+        const publicAgendaList = document.querySelector('#public-agenda-list');
+
+        const agendaTime = (agenda) => {
+            if (!agenda.waktu_mulai) {
+                return 'Sehari';
+            }
+
+            return agenda.waktu_selesai
+                ? `${agenda.waktu_mulai} - ${agenda.waktu_selesai}`
+                : agenda.waktu_mulai;
+        };
+
+        const openPublicAgendaModal = (date, agendas) => {
+            publicAgendaDate.textContent = date;
+            publicAgendaList.innerHTML = '';
+
+            if (!agendas.length) {
+                publicAgendaList.innerHTML = '<div class="rounded-lg border border-dashed border-emerald-200 bg-emerald-50 p-5 text-sm leading-6 text-slate-600">Tidak ada agenda pada tanggal ini.</div>';
+            } else {
+                agendas.forEach((agenda) => {
+                    const item = document.createElement('article');
+                    item.className = 'rounded-lg border border-emerald-100 bg-emerald-50/60 p-5';
+                    item.innerHTML = `
+                        <p class="text-sm font-bold text-emerald-700">${agendaTime(agenda)}</p>
+                        <h4 class="mt-2 text-lg font-bold text-slate-950">${agenda.judul}</h4>
+                        ${agenda.lokasi ? `<p class="mt-2 text-sm font-semibold text-slate-600">${agenda.lokasi}</p>` : ''}
+                        ${agenda.deskripsi ? `<p class="mt-3 text-sm leading-6 text-slate-600">${agenda.deskripsi}</p>` : ''}
+                    `;
+                    publicAgendaList.appendChild(item);
+                });
+            }
+
+            publicAgendaModal.classList.remove('hidden');
+            publicAgendaModal.classList.add('flex');
+        };
+
+        const closePublicAgendaModal = () => {
+            publicAgendaModal.classList.add('hidden');
+            publicAgendaModal.classList.remove('flex');
+        };
+
+        document.querySelectorAll('[data-public-agenda]').forEach((button) => {
+            button.addEventListener('click', () => {
+                openPublicAgendaModal(button.dataset.date, JSON.parse(button.dataset.agendas || '[]'));
+            });
+        });
+
+        document.querySelectorAll('[data-public-agenda-close]').forEach((button) => {
+            button.addEventListener('click', closePublicAgendaModal);
+        });
+
+        publicAgendaModal.addEventListener('click', (event) => {
+            if (event.target === publicAgendaModal) {
+                closePublicAgendaModal();
+            }
+        });
     </script>
 </body>
 </html>

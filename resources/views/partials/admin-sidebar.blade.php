@@ -2,7 +2,7 @@
     $menuItems = [
         ['label' => 'Dashboard', 'href' => route('admin.dashboard'), 'active' => request()->routeIs('admin.dashboard'), 'icon' => 'home'],
         ['label' => 'Berita Desa', 'href' => route('admin.berita.index'), 'active' => request()->routeIs('admin.berita.*'), 'icon' => 'newspaper'],
-        ['label' => 'Agenda', 'href' => '#', 'active' => false, 'icon' => 'calendar'],
+        ['label' => 'Agenda', 'href' => route('admin.agenda.index'), 'active' => request()->routeIs('admin.agenda.*'), 'icon' => 'calendar'],
         ['label' => 'Galeri', 'href' => '#', 'active' => false, 'icon' => 'image'],
         ['label' => 'Pengaduan', 'href' => '#', 'active' => false, 'icon' => 'message'],
         ['label' => 'Pengaturan', 'href' => '#', 'active' => false, 'icon' => 'settings'],
