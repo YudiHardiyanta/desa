@@ -1,7 +1,7 @@
 <header class="sticky top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur">
-    <div class="flex min-h-16 items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+    <div class="flex h-24 items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
         <div class="flex min-w-0 items-center gap-3">
-            <button id="sidebar-toggle" type="button" class="hidden rounded border border-slate-200 p-2 text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 lg:inline-flex" aria-label="Toggle sidebar" aria-expanded="true">
+            <button id="sidebar-toggle" type="button" class="hidden size-12 items-center justify-center rounded border border-slate-200 text-slate-600 transition hover:bg-slate-50 hover:text-slate-950 lg:inline-flex" aria-label="Toggle sidebar" aria-expanded="true">
                 <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
@@ -22,13 +22,26 @@
         </div>
 
         <div class="flex shrink-0 items-center gap-3">
-            <a href="{{ url('/') }}" class="hidden rounded border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:inline-flex">
+            <a href="{{ url('/') }}" class="hidden h-12 items-center rounded border border-slate-200 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:inline-flex">
                 Lihat Situs
             </a>
-            <div class="flex items-center gap-2 rounded border border-slate-200 px-3 py-2">
-                <span class="grid size-8 place-items-center rounded bg-emerald-100 text-sm font-bold text-emerald-800">A</span>
-                <span class="hidden text-sm font-semibold text-slate-700 sm:inline">Admin</span>
-            </div>
+            <details class="relative">
+                <summary class="flex h-12 cursor-pointer list-none items-center gap-3 rounded border border-slate-200 px-3">
+                    <span class="grid size-9 place-items-center rounded bg-emerald-100 text-sm font-bold text-emerald-800">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                    <span class="hidden text-sm font-semibold text-slate-700 sm:inline">{{ auth()->user()->name }}</span>
+                </summary>
+                <div class="absolute right-0 mt-3 w-64 rounded-lg border border-slate-200 bg-white p-4 shadow-xl">
+                    <p class="text-xs font-bold uppercase tracking-wider text-emerald-700">Profil Admin</p>
+                    <p class="mt-2 font-bold text-slate-950">{{ auth()->user()->name }}</p>
+                    <p class="mt-1 break-all text-sm text-slate-500">{{ auth()->user()->email }}</p>
+                    <form class="mt-4" method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="w-full rounded border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </details>
         </div>
     </div>
 </header>

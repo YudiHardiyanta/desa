@@ -24,7 +24,13 @@
                     <p class="mt-3 text-slate-600">Masuk ke sistem layanan Pemerintah Desa Pelaga.</p>
                 </div>
 
-                <form id="login-form" class="mt-8 space-y-5" method="POST" action="#">
+                @if ($errors->any())
+                    <div class="mt-6 rounded border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                        {{ $errors->first() }}
+                    </div>
+                @endif
+
+                <form id="login-form" class="mt-8 space-y-5" method="POST" action="{{ route('login.store') }}">
                     @csrf
                     <label class="block">
                         <span class="text-sm font-semibold text-slate-700">Username</span>
@@ -32,6 +38,7 @@
                             type="text"
                             name="username"
                             autocomplete="username"
+                            value="{{ old('username') }}"
                             class="mt-2 w-full rounded border border-slate-300 bg-white px-4 py-3 outline-none transition placeholder:text-slate-400 focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600"
                             placeholder="Masukkan username"
                         >
@@ -153,6 +160,7 @@
 
             captchaMessage.className = 'mt-2 text-sm font-semibold text-emerald-700';
             captchaMessage.textContent = 'Captcha valid.';
+            loginForm.submit();
         });
 
         createCaptcha();

@@ -1,7 +1,7 @@
 @php
     $menuItems = [
         ['label' => 'Dashboard', 'href' => route('admin.dashboard'), 'active' => request()->routeIs('admin.dashboard'), 'icon' => 'home'],
-        ['label' => 'Berita Desa', 'href' => route('admin.berita.create'), 'active' => request()->routeIs('admin.berita.*'), 'icon' => 'newspaper'],
+        ['label' => 'Berita Desa', 'href' => route('admin.berita.index'), 'active' => request()->routeIs('admin.berita.*'), 'icon' => 'newspaper'],
         ['label' => 'Agenda', 'href' => '#', 'active' => false, 'icon' => 'calendar'],
         ['label' => 'Galeri', 'href' => '#', 'active' => false, 'icon' => 'image'],
         ['label' => 'Pengaduan', 'href' => '#', 'active' => false, 'icon' => 'message'],
@@ -21,8 +21,8 @@
 
 <aside class="hidden overflow-hidden border-r border-slate-200 bg-white transition-all duration-300 lg:block">
     <div class="sticky top-0 flex h-screen flex-col">
-        <div class="flex h-16 items-center gap-3 border-b border-slate-200 px-4">
-            <span class="grid size-10 shrink-0 place-items-center rounded bg-gradient-to-br from-lime-300 to-emerald-500 font-bold text-emerald-950">DP</span>
+        <div class="flex h-24 items-center gap-4 border-b border-slate-200 px-6">
+            <span class="grid size-12 shrink-0 place-items-center rounded bg-gradient-to-br from-lime-300 to-emerald-500 font-bold text-emerald-950">DP</span>
             <div data-sidebar-brand class="min-w-0">
                 <p class="truncate text-sm font-semibold leading-tight text-slate-600">Admin</p>
                 <p class="truncate text-lg font-bold leading-tight text-emerald-950">Desa Pelaga</p>

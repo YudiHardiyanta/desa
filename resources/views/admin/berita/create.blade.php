@@ -16,7 +16,13 @@
             <p class="mt-3 max-w-2xl leading-7 text-emerald-50">Lengkapi informasi berita yang akan ditampilkan pada portal Desa Pelaga.</p>
         </div>
 
-        <form id="berita-form" action="#" method="POST" enctype="multipart/form-data" class="grid gap-6 lg:grid-cols-[1fr_320px]">
+        @if ($errors->any())
+            <div class="rounded border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
+        <form id="berita-form" action="{{ route('admin.berita.store') }}" method="POST" enctype="multipart/form-data" class="grid gap-6 lg:grid-cols-[1fr_320px]">
             @csrf
 
             <div class="space-y-6">
@@ -70,6 +76,11 @@
                                 placeholder="Contoh: Admin Desa Pelaga"
                             >
                         </label>
+
+                        <label class="flex items-center gap-2 text-sm font-semibold text-slate-700">
+                            <input type="checkbox" name="is_active" value="1" checked class="size-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600">
+                            Tampilkan berita di halaman public
+                        </label>
                     </div>
                 </section>
 
@@ -105,7 +116,7 @@
                     <button type="submit" class="flex-1 rounded bg-emerald-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-emerald-800">
                         Simpan Berita
                     </button>
-                    <a href="{{ route('admin.dashboard') }}" class="rounded border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
+                    <a href="{{ route('admin.berita.index') }}" class="rounded border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">
                         Batal
                     </a>
                 </div>

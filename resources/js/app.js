@@ -11,6 +11,8 @@ import codeUrl from 'tinymce/plugins/code/plugin.min.js?url';
 import 'tinymce/skins/ui/oxide/skin.css';
 import 'tinymce/skins/content/default/content.css';
 import 'tinymce/skins/ui/oxide/content.css';
+import DataTable from 'datatables.net-dt';
+import 'datatables.net-dt/css/dataTables.dataTables.css';
 
 const beritaEditor = document.querySelector('#isi-berita');
 const resolveAssetUrl = (url) => new URL(url.split('/').pop(), import.meta.url).href;
@@ -50,4 +52,51 @@ if (beritaEditor) {
             content_style: 'body { font-family: Inter, ui-sans-serif, system-ui, sans-serif; font-size: 16px; line-height: 1.75; }',
         });
     })();
+}
+
+const beritaTableElement = document.querySelector('#berita-table');
+
+if (beritaTableElement) {
+    const beritaTable = new DataTable(beritaTableElement, {
+        pageLength: 10,
+        lengthChange: false,
+        ordering: false,
+        responsive: true,
+        layout: {
+            topStart: null,
+            topEnd: null,
+            bottomStart: 'info',
+            bottomEnd: 'paging',
+        },
+        language: {
+            emptyTable: 'Belum ada berita desa.',
+            info: 'Menampilkan _START_ sampai _END_ dari _TOTAL_ berita',
+            infoEmpty: 'Menampilkan 0 berita',
+            infoFiltered: '(difilter dari _MAX_ total berita)',
+            zeroRecords: 'Berita tidak ditemukan.',
+            paginate: {
+                first: 'Pertama',
+                last: 'Terakhir',
+                next: 'Berikutnya',
+                previous: 'Sebelumnya',
+            },
+        },
+    });
+
+    const searchInput = document.querySelector('#berita-table-search');
+    const statusSelect = document.querySelector('#berita-table-status');
+
+    searchInput?.addEventListener('input', (event) => {
+        beritaTable.search(event.target.value).draw();
+    });
+
+    statusSelect?.addEventListener('change', (event) => {
+        const status = event.target.value;
+        const escapedStatus = DataTable.util.escapeRegex(status);
+
+        beritaTable
+            .column(3)
+            .search(status ? `^${escapedStatus}$` : '', true, false)
+            .draw();
+    });
 }
